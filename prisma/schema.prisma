@@ -2,17 +2,80 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-    shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+// AUTH
+model Tokens {
+  id        String    @id() @default(dbgenerated("gen_random_uuid()")) @db.Uuid /// @zod.uuid()
+  createdAt DateTime? @default(now()) @db.Timestamp(6) /// @zod.custom(imports.dateOrIso)
+  updatedAt DateTime? @default(now()) @db.Timestamp(6) /// @zod.custom(imports.dateOrIso)
+  token     String
+  expiresIn DateTime  @db.Timestamp(6)
+  userId    String?   @db.Uuid /// @zod.uuid()
+  user      User?     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: Restrict)
+
+  @@index([token], map: "_Tokens_token_index")
+}
+
+model PasswordResetCode {
+  code      String   @id() /// @zod.length(6)
+  expiresAt DateTime @db.Timestamp(6) /// @zod.custom(imports.dateOrIso)
+  userId    String?  @db.Uuid /// @zod.uuid()
+  user      User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: Restrict)
+}
+
+model Event {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title             String
+  description       String?
+  start             DateTime
+  end               DateTime?
+  adress1           String
+  adress2           String?
+  city              String?
+  county            String?
+  state             String?
+  zipCode           String?
+  sourcePage        String?
+  sourceScript      String?
+  linkUrl           String?
+  manuallyValidated Boolean?
+  tags              EventToTag[]
+  createdAt         DateTime? @default(now()) @db.Timestamp(6) /// @zod.custom(imports.dateOrIso).nullish()
+  updatedAt         DateTime? @updatedAt @db.Timestamp(6) /// @zod.custom(imports.dateOrIso).nullish()
+}
+
+model User {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  firstName          String?
+  lastName           String?
+  email              String
+  password           String?
+  role               String  @default("USER") // USER or ADMIN
+  emailVerifiedAt    DateTime?
+  tokens             Tokens[]
+  passwordResetCodes PasswordResetCode[]
+  createdAt          DateTime?           @default(now()) @db.Timestamp(6) /// @zod.custom(imports.dateOrIso).nullish()
+  updatedAt          DateTime?           @updatedAt @db.Timestamp(6) /// @zod.custom(imports.dateOrIso).nullish()
+}
+
+model Tag {
+  id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String // Rain or shine, family friendly, concert, indoors/outdoors, RSVP required, sports, parking, free/entrance fee, etc.
+  events EventToTag[]
+}
+
+model EventToTag {
+  id    String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tagId  String @db.Uuid /// @zod.uuid()
+  eventId String @db.Uuid /// @zod.uuid()
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

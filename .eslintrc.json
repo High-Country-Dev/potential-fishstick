@@ -1,22 +1,26 @@
 {
-  "overrides": [
-    {
-      "extends": [
-        "plugin:@typescript-eslint/recommended-requiring-type-checking"
-      ],
-      "files": ["*.ts", "*.tsx"],
-      "parserOptions": {
-        "project": "tsconfig.json"
-      }
-    }
-  ],
   "parser": "@typescript-eslint/parser",
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:prettier/recommended"
+  ],
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "ecmaVersion": "latest",
+    "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
-  "extends": ["next/core-web-vitals", "plugin:@typescript-eslint/recommended"],
   "rules": {
-    "@typescript-eslint/consistent-type-imports": "warn"
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "prettier/prettier": "warn"
+  },
+  "root": true,
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 }
