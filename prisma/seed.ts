@@ -25,7 +25,7 @@ const fakeUser = (
 const fakeEvent = (
   input?: Partial<Prisma.EventCreateArgs>
 ): Prisma.EventCreateManyInput => {
-  const title = faker.lorem.words(5);
+  const title = titleCase(faker.hacker.verb() + " " + faker.hacker.noun());
   const createdAt = faker.date.past(2);
   const updatedAt = faker.date.between(createdAt, new Date());
   const date = faker.date.future();
@@ -45,6 +45,7 @@ const fakeEvent = (
     zipCode: "28607",
     sourcePage: url,
     sourceScript: faker.lorem.words(3),
+    imageUrl: faker.image.food(),
     linkUrl:
       url + `/event/${faker.datatype.number({ min: 10000, max: 99999 })}`,
     manuallyValidated: faker.datatype.boolean(),
@@ -144,3 +145,15 @@ main()
     await prisma.$disconnect();
     return;
   });
+
+function titleCase(str: string, type: "word" | "sentence" = "sentence") {
+  return str
+    .toLowerCase()
+    .split(" ")
+    .map((word, idx) =>
+      type === "word" || (type === "sentence" && idx === 0)
+        ? word.charAt(0).toUpperCase() + word.slice(1)
+        : word
+    )
+    .join(" ");
+}

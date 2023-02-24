@@ -47,6 +47,7 @@ model Event {
   sourceScript      String?
   linkUrl           String?
   manuallyValidated Boolean?
+  imageUrl          String?
   tags              EventToTag[]
   createdAt         DateTime? @default(now()) @db.Timestamp(6) /// @zod.custom(imports.dateOrIso).nullish()
   updatedAt         DateTime? @updatedAt @db.Timestamp(6) /// @zod.custom(imports.dateOrIso).nullish()
